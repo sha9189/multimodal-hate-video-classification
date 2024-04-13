@@ -1,0 +1,19 @@
+Codes/vosk/vosk-model-en-us-0.22
+
+
+#All videos and transcripts data
+Dataset/hate_video_transcripts/*
+Dataset/hate_videos/*
+Dataset/non_hate_video_transcripts/*
+Dataset/non_hate_videos/*
+Dataset/HateMM_annotation.csv
+Dataset/Sample_data
+Dataset/Dataset_Images/*
+Dataset/Dataset_Images_non_hate_videos/*
+Dataset/VITF/*
+
+.DS_Store
+
+# Editor Metadata files
+venv
+Hate-Video-Classification.code-workspace
