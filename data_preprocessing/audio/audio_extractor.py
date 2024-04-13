@@ -3,6 +3,7 @@ import argparse
 from moviepy.editor import VideoFileClip
 
 def video_audio_extractor(video_path, output_path):
+    """Function to extract mp3 files from video files"""
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     log_file_path = os.path.join(output_path, 'errors.log')
@@ -13,7 +14,7 @@ def video_audio_extractor(video_path, output_path):
             continue
         audioname = os.path.splitext(filename)[0]
         audio_output = os.path.join(output_path, f'{audioname}.mp3')
-        
+
         try:
             video = VideoFileClip(full_video_path)
             video.audio.write_audiofile(audio_output)
