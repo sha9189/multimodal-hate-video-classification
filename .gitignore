@@ -12,6 +12,7 @@ data/images/Dataset_Images/*
 data/images/Dataset_Images_non_hate_videos/*
 data/VITF/*
 
+.DS_Store
 */.DS_Store
 */__pycache__
 .DS_Store
@@ -19,3 +20,8 @@ data/VITF/*
 # Editor Metadata files
 venv
 Hate-Video-Classification.code-workspace
+CSE676-Deep-Learning-Final-Project.code-workspace
+.vscode
+
+notebooks/play.ipynb
+play.py

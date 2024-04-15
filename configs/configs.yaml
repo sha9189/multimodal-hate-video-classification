@@ -3,19 +3,17 @@ ROOT_FOLDER :  "./"
 # Dataset related parameters
 DATASET_FOLDER : "./data/"
 VIT_FOLDER : "./data/VITF/"
+PICKLE_FOLDER: "./saved_pickles/"
 
 # Image Model Training Parameters
 IMAGE_FEATURE_EXTRACTOR : "VIT"
 EPOCHS: 20
 BATCH_SIZE: 10
-LEARNING_RATE: 0.001 #1e-4
-LOG_INTERVAL: 100
+LEARNING_RATE: 0.001 #1e-4  
+LOG_INTERVAL: 70 # print training results after how many batches
 NUM_WORKERS: 2 # only GPU option
 PIN_MEMORY: True # only GPU option
 
 
-
-key1: "This is a "
-key2: "concatenated string."
 
 

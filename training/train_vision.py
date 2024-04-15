@@ -1,8 +1,8 @@
 import torch
 import torch.nn.functional as F
-from training.evaluation import evalMetric
+from training.evaluation import evalMetric #, average_metrics
 
-def train(log_interval, model, device, train_loader, optimizer, epoch):
+def train(log_interval, model, device, train_loader, criterion, optimizer, epoch):
     """Function for training model through one epoch including model weight updates
     Inputs:
         log_interval: after how many batches to print the performance on the batch while training
@@ -12,8 +12,8 @@ def train(log_interval, model, device, train_loader, optimizer, epoch):
         optimizer: optimizer object
         epoch: current epoch number
     Outputs:
-        losses: list of losses, one value per batch
-        scores: list of performance metrics dict, one value per batch
+        loss: average loss
+        scores: performance metrics dict
     """
     
     # set model as training mode
@@ -21,6 +21,8 @@ def train(log_interval, model, device, train_loader, optimizer, epoch):
 
     losses = []
     scores = []
+    all_y = []
+    all_y_pred = []
     N_count = 0   # counting total trained sample in one epoch
 
     for batch_idx, (X_text, y) in enumerate(train_loader):
@@ -32,27 +34,53 @@ def train(log_interval, model, device, train_loader, optimizer, epoch):
         optimizer.zero_grad()
         output = model(X_text)  # output size = (batch, number of classes)
 
-        loss = F.cross_entropy(output, y, weight=torch.FloatTensor([0.41, 0.59]).to(device))
-        #loss = F.cross_entropy(output, y)
+        loss = criterion(output, y)
         losses.append(loss.item())
 
-        # to compute accuracy
-        y_pred = torch.max(output, 1)[1]  # y_pred != output
-        metrics = evalMetric(y.cpu().data.squeeze().numpy(), y_pred.cpu().data.squeeze().numpy())
-        scores.append(metrics)         # computed on CPU
+        y_pred = output.max(1, keepdim=True)[1]  # (y_pred != output) get the index of the max log-probability
+
+        # collect all y and y_pred in all batches
+        all_y.extend(y)
+        all_y_pred.extend(y_pred)
 
         loss.backward()
         optimizer.step()
 
         # show information
         if (batch_idx + 1) % log_interval == 0:
-            # print(f'Train Epoch: {epoch + 1} [{N_count}/{len(train_loader.dataset)} ({(100. * (batch_idx + 1) / len(train_loader)):.0f}%)]\tLoss: {loss.item():.6f}, Accu: {(100 * metrics['accuracy']):.2f}%, MF1 Score: {(metrics['mF1Score']):.4f}, F1 Score: {metrics['f1Score']:.4f}, Area Under Curve: {metrics['auc']:.4f}, Precision: {metrics['precision']:.4f}, Recall Score: {metrics['recall']:.4f}')
-            print(f'Train Epoch: {epoch + 1} [{N_count}/{len(train_loader.dataset)} ({(100. * (batch_idx + 1) / len(train_loader)):.0f}%)]\tLoss: {loss.item():.6f}, Accu: {(100 * metrics["accuracy"]):.2f}%, MF1 Score: {(metrics["mF1Score"]):.4f}, F1 Score: {metrics["f1Score"]:.4f}, Area Under Curve: {metrics["auc"]:.4f}, Precision: {metrics["precision"]:.4f}, Recall Score: {metrics["recall"]:.4f}')
+            metrics = evalMetric(y.cpu().data.squeeze().numpy(), y_pred.cpu().data.squeeze().numpy())
+            # print('\nTrain Epoch: {epoch} [{N_count}/{total_count} ({percentage:.0f}%)]\tLoss: {loss:.6f}, Accu: {accuracy:.2f}%, MF1 Score: {mF1:.4f}, F1 Score: {f1:.4f}, AUC: {auc:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}'.format(
+            #     epoch=epoch + 1, 
+            #     N_count=N_count, 
+            #     total_count=len(train_loader.dataset), 
+            #     percentage=100. * (batch_idx + 1) / len(train_loader), 
+            #     loss=loss.item(), 
+            #     accuracy=100 * metrics['accuracy'], 
+            #     mF1=metrics['mF1Score'], 
+            #     f1=metrics['f1Score'], 
+            #     auc=metrics['auc'], 
+            #     precision=metrics['precision'], 
+            #     recall=metrics['recall']))
+            print('\nTrain Epoch: {epoch} [{N_count}/{total_count} ({percentage:.0f}%)]\tLoss: {loss:.6f}, Accu: {accuracy:.2f}%, MF1 Score: {mF1:.4f}'.format(
+                epoch=epoch + 1, 
+                N_count=N_count, 
+                total_count=len(train_loader.dataset), 
+                percentage=100. * (batch_idx + 1) / len(train_loader), 
+                loss=loss.item(), 
+                accuracy=100 * metrics['accuracy'], 
+                mF1=metrics['mF1Score']))
 
-    return losses, scores
+    all_y = torch.stack(all_y, dim=0)
+    all_y_pred = torch.stack(all_y_pred, dim=0)
+    scores = evalMetric(all_y.cpu().data.squeeze().numpy(), all_y_pred.cpu().data.squeeze().numpy())
+
+    # scores = average_metrics(scores)
+    loss = sum(losses) / len(losses)
+
+    return loss, scores
 
 
-def validation(model, device, optimizer, test_loader):
+def validation(model, device, criterion, test_loader, dataset_name):
     """Function to evaluate model on hold-out set (test or validation set)
     Inputs:
         model: model to evaluate
@@ -77,7 +105,7 @@ def validation(model, device, optimizer, test_loader):
 
             output = model(X_text)
 
-            loss = F.cross_entropy(output, y, reduction='sum')
+            loss = criterion(output, y)
             test_loss += loss.item()                 # sum up batch loss
             y_pred = output.max(1, keepdim=True)[1]  # (y_pred != output) get the index of the max log-probability
 
@@ -90,15 +118,26 @@ def validation(model, device, optimizer, test_loader):
     # to compute accuracy
     all_y = torch.stack(all_y, dim=0)
     all_y_pred = torch.stack(all_y_pred, dim=0)
-    print("====================")
-    # try:
     metrics = evalMetric(all_y.cpu().data.squeeze().numpy(), all_y_pred.cpu().data.squeeze().numpy())
-    # except:
-    #   metrics = None
-
+    
+    # print("====================")
     # show information
-    print('\nTest set: ({:d} samples): Average loss: {:.4f}, Accuracy: {:.2f}%, MF1 Score: {:.4f}, F1 Score: {:.4f}, Area Under Curve: {:.4f}, Precision: {:.4f}, Recall Score: {:.4f}'.format(
-                len(all_y), test_loss, 100 * metrics['accuracy'], metrics['mF1Score'], metrics['f1Score'], metrics['auc'], metrics['precision'], metrics['recall']))
+    # print('{dataset_name} set: ({N_count:d} samples): Average loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%, MF1 Score: {mF1:.4f}, F1 Score: {f1:.4f}, Area Under Curve: {auc:.4f}, Precision: {precision:.4f}, Recall Score: {recall:.4f}'.format(
+    #             dataset_name=dataset_name,
+    #             N_count=len(all_y), 
+    #             test_loss=test_loss, 
+    #             accuracy=100 * metrics['accuracy'], 
+    #             mF1=metrics['mF1Score'], 
+    #             f1=metrics['f1Score'], 
+    #             auc=metrics['auc'], 
+    #             precision=metrics['precision'], 
+    #             recall=metrics['recall']))
+    print('{dataset_name} set: ({N_count:d} samples): Average loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%, MF1 Score: {mF1:.4f}'.format(
+                dataset_name=dataset_name,
+                N_count=len(all_y), 
+                test_loss=test_loss, 
+                accuracy=100 * metrics['accuracy'], 
+                mF1=metrics['mF1Score']))
   
     # # save Pytorch models of best record
     # torch.save(model.state_dict(), os.path.join(save_model_path, '3dcnn_epoch{}.pt'.format(epoch + 1)))  # save spatial_encoder
