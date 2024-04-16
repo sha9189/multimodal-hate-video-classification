@@ -7,7 +7,7 @@ PICKLE_FOLDER: "./saved_pickles/"
 
 # Image Model Training Parameters
 IMAGE_FEATURE_EXTRACTOR : "VIT"
-EPOCHS: 20
+EPOCHS: 2
 BATCH_SIZE: 10
 LEARNING_RATE: 0.001 #1e-4  
 LOG_INTERVAL: 70 # print training results after how many batches

@@ -13,6 +13,7 @@ fix_the_random(2021)
 
 def test_model(
         model_cls,
+        dataset_cls,
         epochs:int,
         optimizer_name,
         allDataAnnotation: dict
@@ -53,11 +54,10 @@ def test_model(
         val_list, val_label  =  allDataAnnotation[fold]['val']
         test_list, test_label  =  allDataAnnotation[fold]['test']
 
-        train_set, valid_set , test_set = Dataset_3DCNN(train_list, train_label), Dataset_3DCNN(val_list, val_label), Dataset_3DCNN(test_list, test_label)
+        train_set, valid_set , test_set = dataset_cls(train_list, train_label), dataset_cls(val_list, val_label), dataset_cls(test_list, test_label)
         train_loader = data.DataLoader(train_set, collate_fn = collate_fn, **trainParams)
         test_loader = data.DataLoader(test_set, collate_fn = collate_fn, **valParams)
         valid_loader = data.DataLoader(valid_set, collate_fn = collate_fn, **testParams)
-
         
         model = model_cls().to(device)
 
