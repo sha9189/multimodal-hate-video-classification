@@ -6,7 +6,7 @@ VIT_FOLDER : "./data/VITF/"
 PICKLE_FOLDER: "./saved_pickles/"
 
 # Image Model Training Parameters
-IMAGE_FEATURE_EXTRACTOR : "VIT"
+UNIMODAL_FEATURE_EXTRACTOR : "BERT"
 EPOCHS: 2
 BATCH_SIZE: 10
 LEARNING_RATE: 0.001 #1e-4  

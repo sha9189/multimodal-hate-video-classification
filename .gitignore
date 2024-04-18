@@ -11,6 +11,8 @@ data/Sample_data
 data/images/Dataset_Images/*
 data/images/Dataset_Images_non_hate_videos/*
 data/VITF/*
+data/transcripts/*
+
 
 .DS_Store
 */.DS_Store
@@ -26,3 +28,4 @@ CSE676-Deep-Learning-Final-Project.code-workspace
 notebooks/play.ipynb
 play.py
 Exceptions.txt
+notebooks/t0_text_create_data_splits.py

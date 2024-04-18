@@ -15,7 +15,7 @@ class Dataset_3DCNN(data.Dataset):
         "Initialization"
         self.labels = labels
         self.folders = folders
-        self.load_saved_features(feature_extractor=config["IMAGE_FEATURE_EXTRACTOR"])
+        self.load_saved_features(feature_extractor=config["UNIMODAL_FEATURE_EXTRACTOR"])
 
     def __len__(self):
         "Denotes the total number of samples"
@@ -47,6 +47,9 @@ class Dataset_3DCNN(data.Dataset):
             for i in allVidList:
                 with open(f"{config['VIT_FOLDER']}/{i}_vit.p", 'rb') as fp:
                     self.inputDataFeatures[i] = np.array(pickle.load(fp))
+        elif feature_extractor == "BERT":
+            with open(config["PICKLE_FOLDER"]+'all_rawBERTembedding.p','rb') as fp:
+                self.inputDataFeatures = pickle.load(fp)
         else:
             print("Feature Extractor not defined.. Exiting")
             sys.exit(1)
