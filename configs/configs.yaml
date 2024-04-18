@@ -4,6 +4,7 @@ ROOT_FOLDER :  "./"
 DATASET_FOLDER : "./data/"
 VIT_FOLDER : "./data/VITF/"
 PICKLE_FOLDER: "./saved_pickles/"
+TRANSCRIPTS_FOLDER: "./data/transcripts/"
 
 # Image Model Training Parameters
 UNIMODAL_FEATURE_EXTRACTOR : "BERT"
