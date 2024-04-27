@@ -120,24 +120,12 @@ def validation(model, device, criterion, test_loader, dataset_name):
     all_y_pred = torch.stack(all_y_pred, dim=0)
     metrics = evalMetric(all_y.cpu().data.squeeze().numpy(), all_y_pred.cpu().data.squeeze().numpy())
     
-    # print("====================")
-    # show information
-    # print('{dataset_name} set: ({N_count:d} samples): Average loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%, MF1 Score: {mF1:.4f}, F1 Score: {f1:.4f}, Area Under Curve: {auc:.4f}, Precision: {precision:.4f}, Recall Score: {recall:.4f}'.format(
+    # print('{dataset_name} set: ({N_count:d} samples): Average loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%, MF1 Score: {mF1:.4f}'.format(
     #             dataset_name=dataset_name,
     #             N_count=len(all_y), 
     #             test_loss=test_loss, 
     #             accuracy=100 * metrics['accuracy'], 
-    #             mF1=metrics['mF1Score'], 
-    #             f1=metrics['f1Score'], 
-    #             auc=metrics['auc'], 
-    #             precision=metrics['precision'], 
-    #             recall=metrics['recall']))
-    print('{dataset_name} set: ({N_count:d} samples): Average loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%, MF1 Score: {mF1:.4f}'.format(
-                dataset_name=dataset_name,
-                N_count=len(all_y), 
-                test_loss=test_loss, 
-                accuracy=100 * metrics['accuracy'], 
-                mF1=metrics['mF1Score']))
+    #             mF1=metrics['mF1Score']))
   
     # # save Pytorch models of best record
     # torch.save(model.state_dict(), os.path.join(save_model_path, '3dcnn_epoch{}.pt'.format(epoch + 1)))  # save spatial_encoder

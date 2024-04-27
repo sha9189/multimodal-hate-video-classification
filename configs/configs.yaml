@@ -7,11 +7,11 @@ PICKLE_FOLDER: "./saved_pickles/"
 TRANSCRIPTS_FOLDER: "./data/transcripts/"
 
 # Image Model Training Parameters
-UNIMODAL_FEATURE_EXTRACTOR : "BERT"
-EPOCHS: 2
+UNIMODAL_FEATURE_EXTRACTOR : "VIT"
+EPOCHS: 20
 BATCH_SIZE: 10
 LEARNING_RATE: 0.001 #1e-4  
-LOG_INTERVAL: 70 # print training results after how many batches
+LOG_INTERVAL: 1000 # print training results after how many batches
 NUM_WORKERS: 2 # only GPU option
 PIN_MEMORY: True # only GPU option
 

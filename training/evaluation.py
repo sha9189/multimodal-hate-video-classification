@@ -1,6 +1,11 @@
 from sklearn.metrics import accuracy_score, f1_score, roc_curve, auc, recall_score, precision_score
 import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from utils.utils import load_config
+import os
 
+config = load_config('configs/configs.yaml')
 
 def evalMetric(y_true, y_pred):
     """Function returns 6 types of model evaluation metrics for classification - accuracy, 
@@ -20,21 +25,6 @@ def evalMetric(y_true, y_pred):
     precisionScore = precision_score(y_true, y_pred, labels = np.unique(y_pred))
     return dict({"accuracy": accuracy, 'mF1Score': mf1Score, 'f1Score': f1Score, 'auc': area_under_c,
            'precision': precisionScore, 'recall': recallScore})
-
-# Function not needed
-# def average_metrics(metrics_list):
-#     """Function to give dict of performance metrics given list of metrics by batch
-#     Input: 
-#         metrics_list: list of dictionaries containing metrics by batch
-#     Output:
-#         average metrics dict
-#     """
-#     sum_metrics = {}
-#     for metrics_dict in metrics_list:
-#         for key, value in metrics_dict.items():
-#             sum_metrics[key] = sum_metrics.get(key, 0) + value
-#     avg_metrics = {key: total / len(metrics_list) for key, total in sum_metrics.items()}
-#     return avg_metrics
 
 
 def best_performance_using_kfold_results(finalOutputAccrossFold):
@@ -132,7 +122,12 @@ def aggregate_performance_by_epoch(finalOutputAccrossFold):
             for fold in finalOutputAccrossFold.keys():
                 list_of_dicts.append(finalOutputAccrossFold[fold][score_set][epoch])
             averages = calculate_average_dict(list_of_dicts)
+            averages['loss'] = totalOutput[score_set.replace("scores", "losses")][epoch]
             totalOutput[score_set].append(averages)
+    
+    # delete loss sets since score set includes the loss
+    for loss_set in loss_sets:
+        totalOutput.pop(loss_set)
     return totalOutput   
 
 
@@ -149,3 +144,58 @@ def get_metric_by_epoch(metric_name:str, score_set:str, performance_by_epoch:dic
     for epoch_data in performance_by_epoch[score_set]:
         metric_by_epoch.append(epoch_data[metric_name])
     return metric_by_epoch
+
+
+def plot_all_metrics(performance_by_epoch):
+    """Function plots all the seven metrics being captured for analysis"""
+    metrics = ["loss", "mF1Score", "accuracy", "f1Score", "auc", "precision", "recall"]
+    score_sets = ["epoch_train_scores", "epoch_val_scores", "epoch_test_scores"]
+    score_set_names = ["training set", "validation set", "test set"]
+
+    epochs = range(1, len(performance_by_epoch[score_sets[0]])+1)
+
+    fig, axs = plt.subplots(3, 3, figsize=(12, 8)) # WxH
+
+    for i, metric in enumerate(metrics):
+        train_metrics = get_metric_by_epoch(metric, score_sets[0], performance_by_epoch)
+        val_metrics = get_metric_by_epoch(metric, score_sets[1], performance_by_epoch)
+        test_metrics = get_metric_by_epoch(metric, score_sets[2], performance_by_epoch)
+
+        max_val_metric_epoch = (np.argmax(val_metrics) + 1) if metric != "loss" else (np.argmin(val_metrics) + 1)
+
+        # pick the subplot for the given metric
+        row, col = int(i/3), int(i%3)
+        axs[row, col].plot(epochs, train_metrics, 'b', label='Training ' + metric)
+        axs[row, col].plot(epochs, val_metrics, 'r', label='Validation ' + metric)
+        axs[row, col].plot(epochs, test_metrics, 'g', label='Test ' + metric)
+        axs[row, col].set_title(f"{metric.capitalize()} vs Epoch")
+        axs[row, col].set_xlabel('Epochs')
+        axs[row, col].set_ylabel(metric)
+        axs[row, col].legend()
+
+        # Add vertical line at the epoch with highest validation metric value
+        axs[row, col].axvline(x=max_val_metric_epoch, color='k', linestyle='--', linewidth=0.5)
+
+    plt.tight_layout()
+    plt.show()
+
+
+def save_results(performance_by_epoch, name_of_entry):
+    """Function that saves the best model's performance on test set to ./data/results.csv"""
+    best_epoch_idx = np.argmax(get_metric_by_epoch("mF1Score", "epoch_val_scores", performance_by_epoch))
+    test_metrics = performance_by_epoch["epoch_test_scores"][best_epoch_idx]
+    test_metrics["LR"] = config["LEARNING_RATE"]
+    test_metrics["Name"] = name_of_entry
+    test_metrics = pd.DataFrame.from_dict(test_metrics, orient="index").T
+
+    results_file_path = config["DATASET_FOLDER"]+"results.csv"
+    if os.path.exists(results_file_path):
+        results = pd.read_csv(results_file_path)
+    else:
+        columns = ['Name', 'LR', 'accuracy', 'mF1Score', 'f1Score', 'auc', 'precision', 'recall', 'loss']
+        results = pd.DataFrame(columns=columns)
+    
+    results = pd.concat([results, test_metrics], axis=0).sort_values(by='mF1Score', ascending=False)
+    results.to_csv(results_file_path, index=False)
+    print("Results saved successfully!")
+    

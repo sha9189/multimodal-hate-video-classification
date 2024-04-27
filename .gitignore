@@ -10,8 +10,10 @@ data/HateMM_annotation.csv
 data/Sample_data
 data/images/Dataset_Images/*
 data/images/Dataset_Images_non_hate_videos/*
+data/images/*
 data/VITF/*
 data/transcripts/*
+data/VITF.zip
 
 
 .DS_Store
