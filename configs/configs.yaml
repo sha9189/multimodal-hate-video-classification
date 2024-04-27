@@ -7,7 +7,7 @@ PICKLE_FOLDER: "./saved_pickles/"
 TRANSCRIPTS_FOLDER: "./data/transcripts/"
 
 # Image Model Training Parameters
-UNIMODAL_FEATURE_EXTRACTOR : "VIT"
+UNIMODAL_FEATURE_EXTRACTOR : "BERT"
 EPOCHS: 20
 BATCH_SIZE: 10
 LEARNING_RATE: 0.001 #1e-4  

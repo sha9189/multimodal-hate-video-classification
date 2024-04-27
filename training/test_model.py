@@ -68,6 +68,7 @@ def test_model(
 
         if optimizer_name == "Adam":
             optimizer = torch.optim.Adam(model.parameters(), lr=config["LEARNING_RATE"])   # optimize all cnn parameters
+            # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, mode='min', patience=2)
         train_criterion = nn.CrossEntropyLoss(weight=torch.FloatTensor([0.41, 0.59])).to(device)
         test_criterion = nn.CrossEntropyLoss(reduction='sum')
 
@@ -101,6 +102,9 @@ def test_model(
             test_loss, test_scores, veTest_pred = validation(
                 model, device, test_criterion, test_loader, dataset_name="Test"
             )
+            # scheduler.step(val_loss)
+            # print(f"EPOCH:{epoch}, LR:{scheduler.get_last_lr()}")
+
             if (val_scores['mF1Score']>finalScoreAcc):
                 finalScoreAcc = val_scores['mF1Score']
                 validFinalValue = val_scores
