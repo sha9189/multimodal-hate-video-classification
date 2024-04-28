@@ -24,7 +24,6 @@ class Dataset_3DCNN(data.Dataset):
     def read_text(self,selected_folder):
         return torch.tensor(self.inputDataFeatures[selected_folder])
         
-
     def __getitem__(self, index):
         "Generates one sample of data"
         # Select sample
@@ -50,12 +49,28 @@ class Dataset_3DCNN(data.Dataset):
         elif feature_extractor == "BERT":
             with open(config["PICKLE_FOLDER"]+'all_rawBERTembedding.p','rb') as fp:
                 self.inputDataFeatures = pickle.load(fp)
+        elif feature_extractor == 'MFCC':
+            allAudList = []
+            for name in os.listdir(config['MFCC_FOLDER']):
+                if name.endswith('_mfcc.p'):
+                    if 'non_hate' in name:
+                        basename = name[:-16]
+                        fullname = basename+'_non_hate_mfcc.p'
+                    elif 'hate' in name:
+                        basename = name[:-12]
+                        fullname = basename+'_hate_mfcc.p'
+                    else:
+                        continue
+                    allAudList.append([basename, fullname])
+            for basename, fullname in allAudList:
+                filepath = f"{config['MFCC_FOLDER']}{fullname}"
+                with open(filepath, 'rb') as fp:
+                    self.inputDataFeatures[basename] = np.array(pickle.load(fp))
         else:
             print("Feature Extractor not defined.. Exiting")
             sys.exit(1)
 
     
-
 def collate_fn(batch):
     """Function to remove missing datapoints from the batch(for the last batch)"""
     batch = list(filter(lambda x: x is not None, batch))

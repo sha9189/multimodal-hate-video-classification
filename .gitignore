@@ -14,6 +14,8 @@ data/images/*
 data/VITF/*
 data/transcripts/*
 data/VITF.zip
+data/MFCCF.rar
+data/MFCCF
 
 
 .DS_Store

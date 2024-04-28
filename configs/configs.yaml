@@ -3,15 +3,16 @@ ROOT_FOLDER :  "./"
 # Dataset related parameters
 DATASET_FOLDER : "./data/"
 VIT_FOLDER : "./data/VITF/"
+MFCC_FOLDER: "./data/MFCCF/"
 PICKLE_FOLDER: "./saved_pickles/"
 TRANSCRIPTS_FOLDER: "./data/transcripts/"
 
 # Image Model Training Parameters
-UNIMODAL_FEATURE_EXTRACTOR : "BERT"
-EPOCHS: 20
+UNIMODAL_FEATURE_EXTRACTOR : "ALL"
+EPOCHS: 2
 BATCH_SIZE: 10
 LEARNING_RATE: 0.001 #1e-4  
-LOG_INTERVAL: 1000 # print training results after how many batches
+LOG_INTERVAL: 10 # print training results after how many batches
 NUM_WORKERS: 2 # only GPU option
 PIN_MEMORY: True # only GPU option
 

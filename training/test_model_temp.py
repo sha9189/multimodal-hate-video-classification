@@ -3,7 +3,7 @@ from data_preprocessing.custom_datasets import Dataset_3DCNN, collate_fn
 import torch
 import torch.utils.data as data
 import torch.nn as nn
-from training.train_unimodal import train_unimodal, validation_unimodal
+from training.train_multimodal import train_multimodal, validation_multimodal
 from training.evaluation import best_performance_using_kfold_results, aggregate_performance_by_epoch
 import numpy as np
 from tqdm import tqdm
@@ -87,7 +87,7 @@ def test_model(
         # start training
         for epoch in range(epochs):
             # train, test model
-            train_loss, train_scores = train_unimodal(
+            train_loss, train_scores = train_multimodal(
                 config["LOG_INTERVAL"], 
                 model, 
                 device, 
@@ -96,10 +96,10 @@ def test_model(
                 optimizer, 
                 epoch
             )
-            val_loss, val_scores, veValid_pred = validation_unimodal(
+            val_loss, val_scores, veValid_pred = validation_multimodal(
                 model, device, test_criterion, valid_loader, dataset_name="Val"
             )
-            test_loss, test_scores, veTest_pred = validation_unimodal(
+            test_loss, test_scores, veTest_pred = validation_multimodal(
                 model, device, test_criterion, test_loader, dataset_name="Test"
             )
             # scheduler.step(val_loss)
