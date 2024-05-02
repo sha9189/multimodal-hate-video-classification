@@ -3,7 +3,7 @@ from data_preprocessing.custom_datasets import Dataset_3DCNN, collate_fn
 import torch
 import torch.utils.data as data
 import torch.nn as nn
-from training.train_vision import train, validation
+from training.train_multimodal import train_multimodal, validation_multimodal
 from training.evaluation import best_performance_using_kfold_results, aggregate_performance_by_epoch
 import numpy as np
 from tqdm import tqdm
@@ -11,11 +11,11 @@ from tqdm import tqdm
 config = load_config('configs/configs.yaml')
 fix_the_random(2021)
 
-def test_model(
+def test_model_multimodal(
         model_cls,
         dataset_cls,
         epochs:int,
-        optimizer_name,
+        optimizer_name:str,
         allDataAnnotation: dict
 ):
     """Function to run k-fold CV on the model and return its performance metrics
@@ -32,6 +32,7 @@ def test_model(
         best_std_metrics: std of scores of best model in each fold on test set
     """
 
+    modalities = config["MODALILTIES"].split('+')
     use_cuda = torch.cuda.is_available()                   # check if GPU exists
     device = torch.device("cuda" if use_cuda else "cpu")   # use CPU or GPU
     trainParams = {
@@ -54,12 +55,12 @@ def test_model(
         val_list, val_label  =  allDataAnnotation[fold]['val']
         test_list, test_label  =  allDataAnnotation[fold]['test']
 
-        train_set, valid_set , test_set = dataset_cls(train_list, train_label), dataset_cls(val_list, val_label), dataset_cls(test_list, test_label)
+        train_set, valid_set , test_set = dataset_cls(train_list, train_label, modalities), dataset_cls(val_list, val_label, modalities), dataset_cls(test_list, test_label, modalities)
         train_loader = data.DataLoader(train_set, collate_fn = collate_fn, **trainParams)
         test_loader = data.DataLoader(test_set, collate_fn = collate_fn, **valParams)
         valid_loader = data.DataLoader(valid_set, collate_fn = collate_fn, **testParams)
         
-        model = model_cls(num_hidden_layers = config["NUM_HIDDEN_LAYERS"]).to(device)
+        model = model_cls(modalities).to(device)
 
         # Parallelize model to multiple GPUs
         if torch.cuda.device_count() > 1:
@@ -68,7 +69,7 @@ def test_model(
 
         if optimizer_name == "Adam":
             optimizer = torch.optim.Adam(model.parameters(), lr=config["LEARNING_RATE"])   # optimize all cnn parameters
-            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, mode='min', patience=3)
+            # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, mode='min', patience=2)
         train_criterion = nn.CrossEntropyLoss(weight=torch.FloatTensor([0.41, 0.59])).to(device)
         test_criterion = nn.CrossEntropyLoss(reduction='sum')
 
@@ -87,8 +88,9 @@ def test_model(
         # start training
         for epoch in range(epochs):
             # train, test model
-            train_loss, train_scores = train(
+            train_loss, train_scores = train_multimodal(
                 config["LOG_INTERVAL"], 
+                modalities,
                 model, 
                 device, 
                 train_loader, 
@@ -96,14 +98,14 @@ def test_model(
                 optimizer, 
                 epoch
             )
-            val_loss, val_scores, veValid_pred = validation(
-                model, device, test_criterion, valid_loader, dataset_name="Val"
+            val_loss, val_scores, veValid_pred = validation_multimodal(
+                modalities, model, device, test_criterion, valid_loader, dataset_name="Val"
             )
-            test_loss, test_scores, veTest_pred = validation(
-                model, device, test_criterion, test_loader, dataset_name="Test"
+            test_loss, test_scores, veTest_pred = validation_multimodal(
+                modalities, model, device, test_criterion, test_loader, dataset_name="Test"
             )
-            scheduler.step(val_loss)
-            print(f"EPOCH:{epoch}, LR:{scheduler.get_last_lr()}")
+            # scheduler.step(val_loss)
+            # print(f"EPOCH:{epoch}, LR:{scheduler.get_last_lr()}")
 
             if (val_scores['mF1Score']>finalScoreAcc):
                 finalScoreAcc = val_scores['mF1Score']

@@ -31,6 +31,8 @@ CSE676-Deep-Learning-Final-Project.code-workspace
 
 notebooks/play.ipynb
 play.py
+play_unimodal.py
+play_multimodal.py
 Exceptions.txt
 notebooks/t0_text_create_data_splits.py
 Milestone tracker.xlsx

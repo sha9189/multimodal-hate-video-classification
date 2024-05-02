@@ -1,8 +1,20 @@
+
 import torch
 import torch.nn.functional as F
 from training.evaluation import evalMetric #, average_metrics
+from utils.utils import load_config
 
-def train_multimodal(log_interval, model, device, train_loader, criterion, optimizer, epoch):
+config = load_config('configs/configs.yaml')
+
+def train_multimodal(
+        log_interval, 
+        modalities,
+        model, 
+        device, 
+        train_loader, 
+        criterion, 
+        optimizer, 
+        epoch):
     """Function for training model through one epoch including model weight updates
     Inputs:
         log_interval: after how many batches to print the performance on the batch while training
@@ -25,14 +37,15 @@ def train_multimodal(log_interval, model, device, train_loader, criterion, optim
     all_y_pred = []
     N_count = 0   # counting total trained sample in one epoch
 
-    for batch_idx, (X_text, X_vid, X_audio, y) in enumerate(train_loader):
+    for batch_idx, (X, y) in enumerate(train_loader):
         # distribute data to device 
-        X_text, X_vid, X_audio, y = (X_text.float()).to(device), (X_vid.float()).to(device), (X_audio.float()).to(device), y.to(device).view(-1, )
-    
-        N_count += X_text.size(0)
+        for modality in modalities:
+            X[modality+'_features'] = X[modality+'_features'].to(device)
+        y = y.to(device).view(-1, )
+        N_count += X[modality+'_features'].size(0)
 
         optimizer.zero_grad()
-        output = model(X_text, X_vid, X_audio)  # output size = (batch, number of classes)
+        output = model(X)  # output size = (batch, number of classes)
 
         loss = criterion(output, y)
         losses.append(loss.item())
@@ -80,7 +93,14 @@ def train_multimodal(log_interval, model, device, train_loader, criterion, optim
     return loss, scores
 
 
-def validation_multimodal(model, device, criterion, test_loader, dataset_name):
+
+def validation_multimodal(
+        modalities, 
+        model, 
+        device, 
+        criterion, 
+        test_loader, 
+        dataset_name):
     """Function to evaluate model on hold-out set (test or validation set)
     Inputs:
         model: model to evaluate
@@ -99,11 +119,13 @@ def validation_multimodal(model, device, criterion, test_loader, dataset_name):
     all_y = []
     all_y_pred = []
     with torch.no_grad():
-        for X_text, X_vid, X_audio, y in test_loader:
+        for X, y in test_loader:
             # distribute data to device
-            X_text, X_vid, X_audio, y = (X_text.float()).to(device), (X_vid.float()).to(device), (X_audio.float()).to(device), y.to(device).view(-1, )
+            for modality in modalities:
+                X[modality+'_features'] = X[modality+'_features'].to(device)
+            y = y.to(device).view(-1, )
 
-            output = model(X_text, X_vid, X_audio)
+            output = model(X)
 
             loss = criterion(output, y)
             test_loss += loss.item()                 # sum up batch loss

@@ -1,34 +1,30 @@
 import torch
 import torch.nn as nn
 
-class FCL(nn.Module):
-    def __init__(self):
-        super(FCL, self).__init__()
-        self.fullyconnected_layer1 = nn.Linear(40, 256)
-        self.bn1 = nn.BatchNorm1d(256) 
-        self.fullyconnected_layer2 = nn.Linear(256, 128)
-        self.bn2 = nn.BatchNorm1d(128)
-        self.fullyconnected_layer3 = nn.Linear(128, 64)
-        self.bn3 = nn.BatchNorm1d(64)
-        self.fullyconnected_layer4 = nn.Linear(64, 2)
-        
-    def forward(self, x):
-        x = torch.relu(self.bn1(self.fullyconnected_layer1(x)))
-        x = torch.relu(self.bn2(self.fullyconnected_layer2(x)))
-        x = torch.relu(self.bn3(self.fullyconnected_layer3(x)))
-        x = self.fullyconnected_layer4(x)
-        return x
 
-
-class Aud_Model(nn.Module):
-    def __init__(self, input_size = 40, fc1_hidden=128, fc2_hidden=128, output_size=2):
+class AudioModel(nn.Module):
+    def __init__(self, num_hidden_layers = 1, input_size = 40, hidden_size = 128, output_size = 64):
+        """
+        Inputs: 
+            input size:
+            hidden_size:
+            output_size: 
+            num_hidden_layers: number of hidden layers to add. Total layers = num_hidden_layers + 2(first and last)
+        """
         super().__init__()
-        self.network=nn.Sequential(
-            nn.Linear(input_size,fc1_hidden),
-            nn.ReLU(),
-            nn.Linear(fc1_hidden, fc2_hidden),
-            nn.ReLU(),
-            nn.Linear(fc2_hidden, output_size),
-        )
+        layers = []
+        layers.append(nn.Linear(input_size, hidden_size))
+        # layers.append(nn.BatchNorm1d(hidden_size))
+        layers.append(nn.ReLU())
+
+        for _ in range(num_hidden_layers):
+            layers.append(nn.Linear(hidden_size, hidden_size))
+            #layers.append(nn.BatchNorm1d(hidden_size))
+            layers.append(nn.ReLU())
+        
+        layers.append(nn.Linear(hidden_size, output_size))
+        self.network = nn.Sequential(*layers)
+
     def forward(self, xb):
         return self.network(xb)
+

@@ -8,7 +8,7 @@ PICKLE_FOLDER: "./saved_pickles/"
 TRANSCRIPTS_FOLDER: "./data/transcripts/"
 
 # Image Model Training Parameters
-UNIMODAL_FEATURE_EXTRACTOR : "ALL"
+UNIMODAL_FEATURE_EXTRACTOR : "BERT"
 EPOCHS: 2
 BATCH_SIZE: 10
 LEARNING_RATE: 0.001 #1e-4  
@@ -17,5 +17,13 @@ NUM_WORKERS: 2 # only GPU option
 PIN_MEMORY: True # only GPU option
 
 
+AUDIO_FEATURE_EXTRACTOR: "MFCC"
+VIDEO_FEATURE_EXTRACTOR: "VIT"
+TEXT_FEATURE_EXTRACTOR: "BERT"
 
+MODALILTIES: "AUD+TEXT+VID"
 
+# Modality-specific hyperparameters
+TEXT_HIDDEN_LAYERS: 1 # total layers = TEXT_HIDDEN_LAYERS + 2 (first and last fixed)
+AUD_HIDDEN_LAYERS: 1
+VID_HIDDEN_LAYERS: 1
