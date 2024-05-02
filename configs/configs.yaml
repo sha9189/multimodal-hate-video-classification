@@ -21,13 +21,15 @@ AUDIO_FEATURE_EXTRACTOR: "MFCC"
 VIDEO_FEATURE_EXTRACTOR: "VIT"
 TEXT_FEATURE_EXTRACTOR: "BERT"
 
-MODALILTIES: "AUD"
+MODALILTIES: "AUD+VID+TEXT"
 
 # Modality-specific hyperparameters
-TEXT_HIDDEN_LAYERS: 1 # total layers = TEXT_HIDDEN_LAYERS + 2 (first and last fixed)
-AUD_HIDDEN_LAYERS: 1
+TEXT_HIDDEN_LAYERS: 1 # total layers = TEXT_HIDDEN_LAYERS + 2 (first and last fixed) 
+AUD_HIDDEN_LAYERS: 1 
 VID_HIDDEN_LAYERS: 1
 
 
 USE_SCHEDULER: 1
 USE_XAVIER_INIT: 1
+USE_RESIDUAL_BLOCKS: 0
+# IF USE_RESIDUAL_BLOCKS is 1, then use half the numvber of hidden layers for the same effect

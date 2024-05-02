@@ -3,6 +3,7 @@ import torch
 from models.audio_model import AudioModel
 from models.text_model import TextModel
 from models.vision_models import VideoModel, LSTM
+from models.residual_net import ResidualNet
 from utils.utils import load_config
 import torch.nn.init as init
 
@@ -28,9 +29,19 @@ class MultimodalClassifier(nn.Module):
                 self.models[modality] = VideoModel(num_hidden_layers=config["VID_HIDDEN_LAYERS"])
                 # self.models[modality] = LSTM()
             elif modality == 'TEXT':
-                self.models[modality] = TextModel(num_hidden_layers=config["TEXT_HIDDEN_LAYERS"])
+                if config["USE_RESIDUAL_BLOCKS"] == 1:
+                    self.models[modality] = ResidualNet(
+                        num_hidden_layers=config["VID_HIDDEN_LAYERS"], 
+                        input_size=768)
+                else:
+                    self.models[modality] = TextModel(num_hidden_layers=config["TEXT_HIDDEN_LAYERS"])
             elif modality == 'AUD':
-                self.models[modality] = AudioModel(num_hidden_layers=config["AUD_HIDDEN_LAYERS"])
+                if config["USE_RESIDUAL_BLOCKS"] == 1:
+                    self.models[modality] = ResidualNet(
+                        num_hidden_layers=config["VID_HIDDEN_LAYERS"], 
+                        input_size=40)
+                else:
+                    self.models[modality] = AudioModel(num_hidden_layers=config["AUD_HIDDEN_LAYERS"])
 
         # Final classification layer
         fusion_layer_input_dim = len(modalities) * hidden_dim
