@@ -4,6 +4,7 @@ from models.audio_model import AudioModel
 from models.text_model import TextModel
 from models.vision_models import VideoModel, LSTM
 from utils.utils import load_config
+import torch.nn.init as init
 
 config = load_config('configs/configs.yaml')
 
@@ -34,6 +35,8 @@ class MultimodalClassifier(nn.Module):
         # Final classification layer
         fusion_layer_input_dim = len(modalities) * hidden_dim
         self.fc = nn.Linear(fusion_layer_input_dim, output_dim)
+        if config["USE_XAVIER_INIT"]:
+            init.xavier_uniform_(self.fc.weight)
 
     def forward(self, X):
         modalities_outputs = []
