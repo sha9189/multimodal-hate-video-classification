@@ -1,0 +1,6 @@
+
+AUD: 2 layers for linear complexity and 3 layers for residual is optimal
+
+TEXT: 3 layers for linear complexity and 4 layers for residual is optimal
+
+VID: 2 layers for linear complexity and 1 layer for residual

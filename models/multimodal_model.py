@@ -31,14 +31,14 @@ class MultimodalClassifier(nn.Module):
             elif modality == 'TEXT':
                 if config["USE_RESIDUAL_BLOCKS"] == 1:
                     self.models[modality] = ResidualNet(
-                        num_hidden_layers=config["VID_HIDDEN_LAYERS"], 
+                        num_hidden_layers=config["TEXT_HIDDEN_LAYERS"], 
                         input_size=768)
                 else:
                     self.models[modality] = TextModel(num_hidden_layers=config["TEXT_HIDDEN_LAYERS"])
             elif modality == 'AUD':
                 if config["USE_RESIDUAL_BLOCKS"] == 1:
                     self.models[modality] = ResidualNet(
-                        num_hidden_layers=config["VID_HIDDEN_LAYERS"], 
+                        num_hidden_layers=config["AUD_HIDDEN_LAYERS"], 
                         input_size=40)
                 else:
                     self.models[modality] = AudioModel(num_hidden_layers=config["AUD_HIDDEN_LAYERS"])
