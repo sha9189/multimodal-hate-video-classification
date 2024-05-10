@@ -1,8 +1,6 @@
 # Multimodal Hate Video Classification
 ### Project for CSE676:Deep Learning at University at Buffalo, NY (Taught by Dr. Kaiyi Ji)
 
-Multimodal Hate Video Classification
-
 
 ## Key Features:   
 Modalities and associated large pre-trained model for modal extraction:
