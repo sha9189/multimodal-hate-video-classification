@@ -1,0 +1,5 @@
+Git add commit same time: 
+git add . && git commit -m "Your commit message"
+
+Push to two repos
+git push origin main && git push originshai main
