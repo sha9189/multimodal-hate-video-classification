@@ -4,7 +4,7 @@
 Multimodal Hate Video Classification
 
 
-##### Key Features:   
+## Key Features:   
 Modalities and associated large pre-trained model for modal extraction:
 1. Video: ViT 
 1. Text: BERT
@@ -23,18 +23,22 @@ Key configs:
 
 Detailed report can be found at report/report.pdf.
 
-##### Sample Notebooks
+## Sample Notebooks
 Sample model training notebook available in notebooks/z3_audio_experiment.ipynb.     
 Fusion layer adapts automatically based on the modalities provided in config.yaml file. So test_model_multimodal function can be used for experiments on any modality combination.     
 
     
 
-###### FAQ
+## FAQ
 
 1. Code fails in Windows.    
 Solution: The issue is because the code uses paths compatible with Linux/MacOS. Most paths can be updated from configs.yaml file but a few paths inside the code could also be the reason. Debugging is pretty quick if you just run the code in debug mode and follow where the code goes to find all path declarations. 
 
-1. . Can I get the data to run the code?
-Solution: You can download the data associated with [HateMM: A Multi-Modal Dataset for Hate Video Classification](https://arxiv.org/abs/2305.03915). Notebooks have the code for feature extraction using pretrained models. However, that can be time-consuming and requires a GPU. If you're just looking to run our test_model_multimodal function, reach out to me at [shailesh.s.mahto@gmail.com](mailto:shailesh.s.mahto@gmail.com). Happy to share extracted features.
+1. . Can I get the data to run the code?    
+Solution: You can download the data associated with [HateMM: A Multi-Modal Dataset for Hate Video Classification](https://arxiv.org/abs/2305.03915). Notebooks have the code for feature extraction using pretrained models. However, that can be time-consuming and requires a GPU. If you're just looking to run your experiments on test_model_multimodal function, reach out to me at [shailesh.s.mahto@gmail.com](mailto:shailesh.s.mahto@gmail.com). Happy to share extracted features.
 
 
+
+## References 
+
+- [HateMM: A Multi-Modal Dataset for Hate Video Classification](https://arxiv.org/abs/2305.03915)
